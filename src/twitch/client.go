@@ -72,6 +72,7 @@ func (client *Client) StreamChat() chan entities.Response {
 			// Removing \r\n chars
 			line = strings.Replace(line, "\n", "", -1)
 			line = strings.Replace(line, "\r", "", -1)
+			line = filterNonGSM(line)
 
 			err = client.handlePing(line)
 			if err != nil {
@@ -150,4 +151,40 @@ func (client *Client) Read() (string, error) {
 		return "", err
 	}
 	return line, nil
+}
+
+func filterNonGSM(s string) string {
+	gsmChars := map[rune]bool{
+		'A': true, 'B': true, 'C': true, 'D': true, 'E': true, 'F': true, 'G': true,
+		'H': true, 'I': true, 'J': true, 'K': true, 'L': true, 'M': true, 'N': true,
+		'O': true, 'P': true, 'Q': true, 'R': true, 'S': true, 'T': true, 'U': true,
+		'V': true, 'W': true, 'X': true, 'Y': true, 'Z': true,
+		'a': true, 'b': true, 'c': true, 'd': true, 'e': true, 'f': true, 'g': true,
+		'h': true, 'i': true, 'j': true, 'k': true, 'l': true, 'm': true, 'n': true,
+		'o': true, 'p': true, 'q': true, 'r': true, 's': true, 't': true, 'u': true,
+		'v': true, 'w': true, 'x': true, 'y': true, 'z': true,
+		'0': true, '1': true, '2': true, '3': true, '4': true, '5': true, '6': true,
+		'7': true, '8': true, '9': true,
+		'!': true, '#': true, ' ': true, '"': true, '%': true, '&': true, '\'': true,
+		'(': true, ')': true, '*': true, ',': true, '.': true, '?': true, '+': true,
+		'-': true, '/': true, ';': true, ':': true, '<': true, '=': true, '>': true,
+		'¡': true, '¿': true, '_': true, '@': true, '$': true, '£': true, '¥': true,
+		'¤': true,
+		'è': true, 'é': true, 'ù': true, 'ì': true, 'ò': true, 'Ç': true, 'Ø': true,
+		'ø': true, 'Æ': true, 'æ': true, 'ß': true, 'É': true, 'Å': true, 'å': true,
+		'Ä': true, 'Ö': true, 'Ñ': true, 'Ü': true, '§': true, 'ä': true, 'ö': true,
+		'ñ': true, 'ü': true, 'à': true,
+		'Δ': true, 'Φ': true, 'Ξ': true, 'Γ': true, 'Ω': true, 'Π': true, 'Ψ': true,
+		'Σ': true, 'Θ': true, 'Λ': true, '\n': true, '\r': true, '\t': true,
+		0x0C: true, // Form Feed
+		0x1B: true, // Escape
+	}
+
+	var res strings.Builder // Use strings.Builder for efficient string concatenation
+	for _, r := range s {
+		if _, ok := gsmChars[r]; ok {
+			res.WriteRune(r)
+		}
+	}
+	return strings.TrimSpace(res.String())
 }
