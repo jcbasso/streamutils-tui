@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"streamutils-tui/src/entities"
+	"strings"
 )
 
 func ParsePacket(message string) (entities.Payload, error) {
@@ -21,6 +22,11 @@ func ParsePacket(message string) (entities.Payload, error) {
 		if i <= len(match) {
 			paramsMap[name] = match[i]
 		}
+	}
+
+	// Trim whitespace from the Message
+	if msg, ok := paramsMap["Message"]; ok {
+		paramsMap["Message"] = strings.TrimSpace(msg)
 	}
 
 	res := entities.Payload{

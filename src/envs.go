@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func LoadEnv() (string, string) {
+func LoadEnv() (string, string, string) {
 	err := godotenv.Load()
 	if err != nil && !os.IsNotExist(err) {
 		log.Fatal("Error loading .env file:", err)
@@ -22,5 +22,10 @@ func LoadEnv() (string, string) {
 		log.Fatal("Missing env variable TWITCH_OAUTH_TOKEN")
 	}
 
-	return username, oauthToken
+	channel := os.Getenv("TWITCH_CHANNEL")
+	if channel == "" {
+		log.Fatal("Missing env variable TWITCH_CHANNEL")
+	}
+
+	return username, oauthToken, channel
 }
