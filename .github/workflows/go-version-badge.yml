@@ -1,0 +1,60 @@
+name: Go Version Badge
+
+on:
+  push:
+    branches:
+      - '**'
+    paths:
+      - 'go.mod'
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get Go Version from go.mod
+        id: go-version
+        run: |
+          if [ -f "go.mod" ]; then
+            echo "version=$(grep '^go ' go.mod | cut -d ' ' -f 2 | sed 's/^v//')" >> $GITHUB_OUTPUT
+          else
+            echo "version=unknown" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Go Version Badge
+        run: |
+          GO_VERSION="${{ steps.go-version.outputs.version }}"
+          TEMPLATE=$(cat docs/assets/go-version-badge-template.svg)
+          SVG=$(echo "$TEMPLATE" | sed "s/{{GO_VERSION}}/$GO_VERSION/g")
+          echo "$SVG" > docs/assets/go-version-badge.svg
+
+      - name: Check for Badge Changes
+        id: check-changes
+        run: |
+          FILE="docs/assets/go-version-badge.svg"
+
+          if git ls-files --error-unmatch "$FILE" > /dev/null 2>&1; then
+            if git diff --exit-code --quiet -- "$FILE"; then
+              echo "changed=false" >> $GITHUB_OUTPUT
+            else
+              echo "changed=true" >> $GITHUB_OUTPUT
+            fi
+          else
+            if git diff --exit-code --quiet /dev/null "$FILE"; then
+              echo "changed=false" >> $GITHUB_OUTPUT
+            else
+              echo "changed=true" >> $GITHUB_OUTPUT
+            fi
+          fi
+          echo "check-changes output: ${{ steps.check-changes.outputs.changed }}"
+          
+
+      - name: Commit Badge
+        if: steps.check-changes.outputs.changed == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Bot: Updating Go version badge to v${{ steps.go-version.outputs.version }}"
+          file_pattern: docs/assets/go-version-badge.svg
+          branch: ${{ github.ref_name }}

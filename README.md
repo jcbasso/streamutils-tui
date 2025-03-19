@@ -1,4 +1,6 @@
 # Stream Utils TUI
+![Go Version](docs/assets/go-version-badge.svg)
+
 This Terminal UI application aims to provide utils from streaming apps such as Twitch chat.
 
 ## Env Vars
