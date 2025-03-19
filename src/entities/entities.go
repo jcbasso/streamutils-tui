@@ -15,7 +15,7 @@ type Tags struct {
 }
 
 type Payload struct {
-	Action   string
+	Action   string // TODO: Move to enum
 	Username string
 	Channel  string
 	Message  string

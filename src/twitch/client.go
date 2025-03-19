@@ -79,6 +79,14 @@ func (client *Client) StreamChat() chan entities.Response {
 				close(messages)
 			}
 
+			if client.joinedSuccessfullyMessage(line) {
+				messages <- entities.Response{
+					Payload: entities.Payload{
+						Action: "SUCCESS",
+					},
+				}
+			}
+
 			if client.isSystemMessage(line) {
 				continue
 			}
@@ -116,6 +124,11 @@ func (client *Client) handlePing(message string) error {
 		}
 	}
 	return nil
+}
+
+func (client *Client) joinedSuccessfullyMessage(message string) bool {
+	re := regexp.MustCompile(`^:tmi\.twitch\.tv\s+001\s+\w+\s+:Welcome,\s*GLHF!$`)
+	return re.MatchString(message)
 }
 
 func (client *Client) isSystemMessage(message string) bool {
