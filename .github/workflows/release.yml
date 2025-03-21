@@ -1,0 +1,43 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get Release Tag
+        id: get-release-tag
+        run: |
+          TAG=$(gh release list --limit 1 --exclude-drafts=false --exclude-pre-releases=true | awk 'NR==1{print $2}' || echo "v0.0.1")
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Tag
+        id: create-tag
+        run: |
+          git tag ${{ steps.get-release-tag.outputs.tag }}
+          git push origin ${{ steps.get-release-tag.outputs.tag }}
+
+      - name: Get Previous tag
+        id: get-previous-tag
+        run: echo "tag=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || echo 'v0.0.0')" >> $GITHUB_OUTPUT
+
+      - name: Publish Release
+        uses: softprops/action-gh-release@v1
+        if: steps.get-previous-tag.outputs.tag != steps.get-release-tag.outputs.tag
+        with:
+          draft: false
+          prerelease: false
+          tag_name: ${{ steps.get-release-tag.outputs.tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
