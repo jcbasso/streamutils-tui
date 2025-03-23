@@ -11,8 +11,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: release-drafter/release-drafter@v6
-        with:
-          config-name: release-drafter-config.yml
-          commitish: ${{ github.event.pull_request.head.sha || github.sha }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
