@@ -13,7 +13,7 @@ jobs:
         with:
           ref: ${{ github.ref }}
           fetch-depth: 0
-
+#
       - name: Get Release Tag
         id: get-release-tag
         run: |
