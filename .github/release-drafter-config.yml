@@ -35,9 +35,6 @@ autolabeler:
   - label: 'feature'
     branch:
       - '/^feature\/.*/'
-  - label: 'chore'
-    branch:
-      - '/^chore\/.*/'
   - label: 'dependencies'
     files:
       - 'go.mod'
