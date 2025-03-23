@@ -24,3 +24,11 @@ func (hm helpKeyMaps) FullHelp() [][]key.Binding {
 	}
 	return bindings
 }
+
+func (hm helpKeyMaps) OtherFunc() [][]key.Binding {
+	var bindings [][]key.Binding
+	for _, elem := range hm.keyMaps {
+		bindings = append(bindings, elem.FullHelp()...)
+	}
+	return bindings
+}
