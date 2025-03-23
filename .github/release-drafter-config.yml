@@ -1,19 +1,46 @@
 name-template: 'v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
-categories:
-  - title: '🚀 Features'
-    label: 'feature'
-  - title: '🐛 Bug Fixes'
-    label: 'bug'
-  - title: '🧰 Maintenance'
-    labels:
-      - 'chore'
-      - 'dependencies'
-change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 template: |
-  ## Changes
+  # What's Changed
 
   $CHANGES
+
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
+
+categories:
+  - title: 'Breaking'
+    label: 'breaking'
+  - title: 'New'
+    label: 'feature'
+  - title: 'Bug Fixes'
+    label: 'bug'
+  - title: 'Maintenance'
+    label: 'maintenance'
+  - title: 'Documentation'
+    label: 'docs'
+  - title: 'Other changes'
+  - title: 'Dependency Updates'
+    label: 'dependencies'
+    collapse-after: 5
+
+version-resolver:
+  major:
+    labels:
+      - 'breaking'
+  minor:
+    labels:
+      - 'feature'
+  patch:
+    labels:
+      - 'bug'
+      - 'maintenance'
+      - 'docs'
+      - 'dependencies'
+      - 'security'
+
+exclude-labels:
+  - 'skip-changelog'
+
 version-resolver:
   major:
     labels:
@@ -25,19 +52,19 @@ version-resolver:
   patch:
     labels:
       - 'patch'
-      - 'bug'
+      - 'fix'
       - 'dependencies'
   default: patch
+
 autolabeler:
-  - label: 'bug'
-    files:
-      - '*.go' # Consider all changes as bug if there is not label.
+  - label: 'fix'
+    branch:
+      - '/^fix\/.+/'
+      - '/^hotfix\/.+/'
+      - '/^bugfix\/.+/'
   - label: 'feature'
     branch:
       - '/^feature\/.*/'
-  - label: 'chore'
-    branch:
-      - '/^chore\/.*/'
   - label: 'dependencies'
     files:
       - 'go.mod'
