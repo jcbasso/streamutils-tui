@@ -1,19 +1,22 @@
 name-template: 'v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
+
 categories:
   - title: '🚀 Features'
     label: 'feature'
-  - title: '🐛 Bug Fixes'
-    label: 'bug'
+  - title: '🐛 Fixes'
+    label: 'fix'
   - title: '🧰 Maintenance'
     labels:
       - 'chore'
       - 'dependencies'
+
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 template: |
   ## Changes
 
   $CHANGES
+
 version-resolver:
   major:
     labels:
@@ -25,13 +28,16 @@ version-resolver:
   patch:
     labels:
       - 'patch'
-      - 'bug'
+      - 'fix'
       - 'dependencies'
   default: patch
+
 autolabeler:
-  - label: 'bug'
-    files:
-      - '*.go' # Consider all changes as bug if there is not label.
+  - label: 'fix'
+    branch:
+      - '/^fix\/.+/'
+      - '/^hotfix\/.+/'
+      - '/^bugfix\/.+/'
   - label: 'feature'
     branch:
       - '/^feature\/.*/'
