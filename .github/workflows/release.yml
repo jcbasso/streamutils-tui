@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Get Release Tag
+        id: get-release-tag
+        run: |
+          TAG=$(gh release list --limit 1 --exclude-drafts --exclude-pre-releases --jq '.[0].tagName' --json tagName)
+          if [ -z "$TAG" ]; then
+            TAG="v0.0.1"
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "New Tag: $TAG"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get Previous tag
+        id: get-previous-tag
+        run: |
+          TAG=$(git tag -l 'v*' | sort -rV | head -n 1)
+          if [ -z "$TAG" ]; then
+            TAG="v0.0.0"
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Previous Tag: $TAG"
+
+      - name: Compare and Proceed
+        id: compare-tags
+        run: |
+          NEW_TAG="${{ steps.get-release-tag.outputs.tag }}"
+          PREV_TAG="${{ steps.get-previous-tag.outputs.tag }}"
+
+          if printf '%s\n' "$PREV_TAG" "$NEW_TAG" | sort -C -V; then
+            if [[ "$PREV_TAG" == "$NEW_TAG" ]]; then
+              echo "::notice ::New tag is the same as previous ($NEW_TAG). Skipping."
+              echo "release=false" >> $GITHUB_OUTPUT
+            else
+              echo "::notice ::Releasing version: $NEW_TAG"
+              git tag "$NEW_TAG"
+              git push origin "$NEW_TAG"
+              echo "release=true" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "::error ::New tag ($NEW_TAG) is smaller than previous tag ($PREV_TAG)."
+            exit 1
+          fi
+
+      - name: Publish Release
+        if: steps.compare-tags.outputs.release == 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: false
+          prerelease: false
+          tag_name: ${{ steps.get-release-tag.outputs.tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
