@@ -7,6 +7,7 @@
 
 Terminal UI application aiming to provide utils for streaming apps such as Twitch chat.
 
+![preview](docs/assets/preview.gif)
 </div>
 
 ---
