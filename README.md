@@ -2,7 +2,8 @@
 
 # Stream Utils TUI
 
-![Go Version](docs/assets/go-version-badge.svg)
+[![go version](docs/assets/badge/go-version-badge.svg)](https://github.com/jcbasso/streamutils-tui/blob/main/go.mod)
+[![release](docs/assets/badge/release-badge.svg)](https://github.com/jcbasso/streamutils-tui/releases)
 
 Terminal UI application aiming to provide utils for streaming apps such as Twitch chat.
 

@@ -6,7 +6,6 @@ on:
       - '**'
     paths:
       - 'go.mod'
-  workflow_dispatch:
 
 jobs:
   generate:
@@ -26,14 +25,14 @@ jobs:
       - name: Create Go Version Badge
         run: |
           GO_VERSION="${{ steps.go-version.outputs.version }}"
-          TEMPLATE=$(cat docs/assets/go-version-badge-template.svg)
+          TEMPLATE=$(cat docs/assets/badge/go-version-badge-template.svg)
           SVG=$(echo "$TEMPLATE" | sed "s/{{GO_VERSION}}/$GO_VERSION/g")
-          echo "$SVG" > docs/assets/go-version-badge.svg
+          echo "$SVG" > docs/assets/badge/go-version-badge.svg
 
       - name: Check for Badge Changes
         id: check-changes
         run: |
-          FILE="docs/assets/go-version-badge.svg"
+          FILE="docs/assets/badge/go-version-badge.svg"
 
           if git ls-files --error-unmatch "$FILE" > /dev/null 2>&1; then
             if git diff --exit-code --quiet -- "$FILE"; then
@@ -56,5 +55,5 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "Bot: Updating Go version badge to v${{ steps.go-version.outputs.version }}"
-          file_pattern: docs/assets/go-version-badge.svg
+          file_pattern: docs/assets/badge/go-version-badge.svg
           branch: ${{ github.ref_name }}
