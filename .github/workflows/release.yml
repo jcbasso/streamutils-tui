@@ -8,11 +8,13 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.ref }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Get Release Tag
         id: get-release-tag
@@ -48,8 +50,11 @@ jobs:
               echo "release=false" >> $GITHUB_OUTPUT
             else
               echo "::notice ::Releasing version: $NEW_TAG"
+              git config --local user.name github-actions
+              git config --local user.email github-actions@github.com
               git tag "$NEW_TAG"
-              git push origin "$NEW_TAG"
+              # Use the environment secret PAT for authentication
+              git push https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ github.repository }}.git "$NEW_TAG"
               echo "release=true" >> $GITHUB_OUTPUT
             fi
           else
