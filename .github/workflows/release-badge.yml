@@ -13,43 +13,28 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get Latest Tag
-        id: latest-tag
+      - name: Get Tag and Commit SHA
+        id: tag-info
         run: |
           TAG=${GITHUB_REF#refs/tags/}
+          COMMIT_SHA=$(git rev-parse $TAG)
           echo "tag=$TAG" >> $GITHUB_OUTPUT
-          echo "Latest Tag: $TAG"
+          echo "Tag: $TAG"
+          echo "commit_sha=$COMMIT_SHA" >> $GITHUB_OUTPUT
+          echo "Commit SHA: $COMMIT_SHA"
 
-      - name: Create Release Badge
-        run: |
-          RELEASE_VERSION="${{ steps.latest-tag.outputs.tag }}"
-          TEMPLATE=$(cat docs/assets/badge/release-badge-template.svg)
-          SVG=$(echo "$TEMPLATE" | sed "s/{{RELEASE_VERSION}}/$RELEASE_VERSION/g")
-          echo "$SVG" > docs/assets/badge/release-badge.svg
-
-      - name: Check for Badge Changes
-        id: check-changes
-        run: |
-          FILE="docs/assets/badge/release-badge.svg"
-
-          if git ls-files --error-unmatch "$FILE" > /dev/null 2>&1; then
-            if git diff --exit-code --quiet -- "$FILE"; then
-              echo "changed=false" >> $GITHUB_OUTPUT
-            else
-              echo "changed=true" >> $GITHUB_OUTPUT
-            fi
-          else
-            if git diff --exit-code --quiet /dev/null "$FILE"; then
-              echo "changed=false" >> $GITHUB_OUTPUT
-            else
-              echo "changed=true" >> $GITHUB_OUTPUT
-            fi
-          fi
-          echo "check-changes output: ${{ steps.check-changes.outputs.changed }}"
-
-      - name: Commit Badge
-        uses: stefanzweifel/git-auto-commit-action@v5
+      - name: Find Branch for Commit
+        id: find_branch_action
+        uses: ./.github/actions/find-branch
         with:
-          commit_message: "Bot: Update release badge to ${{ steps.latest-tag.outputs.tag }}"
-          file_pattern: "docs/assets/badge/release-badge.svg"
-          branch: main
+          commit-sha: ${{ steps.tag-info.outputs.commit_sha }}
+
+      - name: Update Release Badge
+        uses: ./.github/actions/update-badge
+        with:
+          template-path: docs/assets/badge/release-badge-template.svg
+          output-path: docs/assets/badge/release-badge.svg
+          placeholder: RELEASE_VERSION
+          value: ${{ steps.tag-info.outputs.tag }}
+          commit-message: "Bot: Update release badge to ${{ steps.tag-info.outputs.tag }}"
+          commit-branch: ${{ steps.find_branch_action.outputs.branch }}
