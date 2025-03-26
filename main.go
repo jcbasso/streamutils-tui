@@ -1,13 +1,21 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	"streamutils-tui/src"
 	"streamutils-tui/src/tui"
 	"streamutils-tui/src/twitch"
 )
 
 func main() {
-	username, accessToken, channel := src.LoadEnv()
+	if len(os.Args) != 2 {
+		fmt.Println("Usage: streamutils-tui <channel>")
+		return
+	}
+
+	channel := os.Args[1]
+	username, accessToken := src.LoadEnv()
 
 	twitchClient := twitch.New(accessToken, username, "irc.chat.twitch.tv:6667")
 
