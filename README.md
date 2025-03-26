@@ -24,3 +24,8 @@ Terminal UI application aiming to provide utils for streaming apps such as Twitc
 ```go
 go run .
 ```
+
+## Development
+
+- Use specified [go version](#stream-utils-tui).
+- Follow [git branching model & release specifications](docs/git-branching-model.md).
