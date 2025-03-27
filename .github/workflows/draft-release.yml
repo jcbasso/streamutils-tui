@@ -78,6 +78,6 @@ jobs:
       - name: Upload RC Assets to Draft
         uses: AButler/upload-release-assets@v3.0
         with:
-          files: './build/*.*'
+          files: './build/*'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           release-id: ${{ steps.release_drafter.outputs.id }}
