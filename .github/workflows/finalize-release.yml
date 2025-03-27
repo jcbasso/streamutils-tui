@@ -99,21 +99,21 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # gh cli uses this
 
-#      - name: Cleanup RC Tags (Optional)
-#        # Only run if a new tag was created
-#        if: steps.final_tag.outputs.tag_exists == 'false'
-#        shell: bash
-#        run: |
-#          FINAL_TAG="${{ steps.final_tag.outputs.final_tag }}"
-#          echo "Cleaning up RC tags for $FINAL_TAG..."
-#          git fetch --tags --quiet
-#          RC_TAGS=$(git tag --list "${FINAL_TAG}-rc*")
-#          if [[ -n "$RC_TAGS" ]]; then
-#            for rc_tag in $RC_TAGS; do
-#              echo "Deleting remote tag $rc_tag"
-#              # Use PAT for delete permissions
-#              git push https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }}.git --delete "$rc_tag" || echo "::warning::Failed to delete tag $rc_tag. It might have already been deleted."
-#            done
-#          else
-#            echo "No RC tags found to delete."
-#          fi
+      - name: Cleanup RC Tags (Optional)
+        # Only run if a new tag was created
+        if: steps.final_tag.outputs.tag_exists == 'false'
+        shell: bash
+        run: |
+          FINAL_TAG="${{ steps.final_tag.outputs.final_tag }}"
+          echo "Cleaning up RC tags for $FINAL_TAG..."
+          git fetch --tags --quiet
+          RC_TAGS=$(git tag --list "${FINAL_TAG}-rc*")
+          if [[ -n "$RC_TAGS" ]]; then
+            for rc_tag in $RC_TAGS; do
+              echo "Deleting remote tag $rc_tag"
+              # Use PAT for delete permissions
+              git push https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }}.git --delete "$rc_tag" || echo "::warning::Failed to delete tag $rc_tag. It might have already been deleted."
+            done
+          else
+            echo "No RC tags found to delete."
+          fi

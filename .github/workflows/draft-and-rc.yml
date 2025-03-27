@@ -23,15 +23,23 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0 # Needed for tag history
 
+      - name: Run PR Labeler
+        uses: TimonVS/pr-labeler-action@v5 # Check for latest version
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml # Explicitly point to config
+          # sync-labels: true # Optional: Remove labels if rules no longer match
+
       # Run Release Drafter to create/update the draft
       - name: Draft Release Notes
         id: release_drafter
-        uses: release-drafter/release-drafter@v6
+        uses: jcbasso/release-drafter@test
         with:
           # Ensure it creates a DRAFT, not publish immediately
           publish: false
           # Target the commit at the head of the PR
           commitish: ${{ github.event.pull_request.head.sha }}
+          disable-autolabeler: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Standard token is fine for drafting
 
