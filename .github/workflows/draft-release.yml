@@ -22,7 +22,7 @@ jobs:
 
       - name: Draft Release Notes
         id: release_drafter
-        uses: jcbasso/release-drafter@nightly
+        uses: jcbasso/release-drafter@nightlyV2
         with:
           publish: true
           prerelease: true
@@ -37,7 +37,7 @@ jobs:
         with:
           platforms: linux/amd64,linux/386,linux/arm64,windows/amd64,windows/386,darwin/amd64,darwin/arm64
           package-dir: .
-          version: v${{ steps.release_drafter.outputs.tag_name }}
+          version: ${{ steps.release_drafter.outputs.tag_name }}
           app-name: streamutils-tui
           output-dir: build
 
