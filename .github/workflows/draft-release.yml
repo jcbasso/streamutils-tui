@@ -25,75 +25,24 @@ jobs:
         uses: jcbasso/release-drafter@nightly
         with:
           publish: false
+          prerelease: true
+          prerelease-identifier: 'rc'
           commitish: ${{ github.event.pull_request.head.sha }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Calculate Next RC Tag
-        id: rc_tag
-        shell: bash
-        run: |
-          # Get the base tag name calculated by Release Drafter
-          BASE_TAG="${{ steps.release_drafter.outputs.tag_name }}"
-          if [[ -z "$BASE_TAG" ]]; then
-            echo "::warning::Release Drafter did not output a tag name. Skipping RC tag."
-            echo "create_rc=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          echo "Base tag determined by Release Drafter: $BASE_TAG"
-
-          # Fetch all tags to ensure we have the latest list
-          git fetch --tags --quiet
-
-          # Find the highest existing RC number for this base tag
-          HIGHEST_RC=0
-          # List tags like BASE_TAG-rc*, sort numerically by RC number, get the last one
-          LATEST_RC_TAG=$(git tag --list "${BASE_TAG}-rc*" | sed -E 's/.*-rc//' | sort -n | tail -n 1)
-
-          if [[ -n "$LATEST_RC_TAG" ]]; then
-            HIGHEST_RC=$LATEST_RC_TAG
-          fi
-
-          NEXT_RC=$((HIGHEST_RC + 1))
-          NEW_RC_TAG="${BASE_TAG}-rc${NEXT_RC}"
-
-          echo "Next RC tag: $NEW_RC_TAG"
-          echo "new_rc_tag=$NEW_RC_TAG" >> $GITHUB_OUTPUT
-          echo "create_rc=true" >> $GITHUB_OUTPUT
-
-
-      - name: Create and Push RC Tag
-        if: steps.rc_tag.outputs.create_rc == 'true'
-        shell: bash
-        run: |
-          NEW_RC_TAG="${{ steps.rc_tag.outputs.new_rc_tag }}"
-          COMMIT_SHA="${{ github.event.pull_request.head.sha }}"
-
-          if git rev-parse -q --verify "refs/tags/$NEW_RC_TAG" >/dev/null; then
-             echo "::warning::Tag $NEW_RC_TAG already exists locally. Skipping creation."
-             exit 0
-          fi
-
-          echo "Creating tag $NEW_RC_TAG pointing to $COMMIT_SHA"
-          git tag "$NEW_RC_TAG" "$COMMIT_SHA"
-
-          echo "Pushing tag $NEW_RC_TAG"
-          git push https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }}.git "$NEW_RC_TAG"
-
       - name: Build Go Binaries for RC
         id: build
-        if: steps.rc_tag.outputs.create_rc == 'true'
         uses: ./.github/actions/go-builder
         with:
           platforms: linux/amd64,linux/386,linux/arm64,windows/amd64,windows/386,darwin/amd64,darwin/arm64
           package-dir: .
-          version: ${{ steps.rc_tag.outputs.new_rc_tag }}
+          version: v${{ steps.release_drafter.outputs.tag_name }}
           app-name: streamutils-tui
           output-dir: build
 
       - name: Delete Previous RC Assets from Draft
-        if: steps.rc_tag.outputs.create_rc == 'true' && steps.release_drafter.outputs.id != ''
+        if: steps.release_drafter.outputs.id != ''
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -127,7 +76,6 @@ jobs:
           echo "Finished deleting previous assets."
 
       - name: Upload RC Assets to Draft
-        if: steps.rc_tag.outputs.create_rc == 'true'
         uses: AButler/upload-release-assets@v3.0
         with:
           files: './build/*.*'
