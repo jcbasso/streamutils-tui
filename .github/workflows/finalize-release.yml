@@ -21,6 +21,7 @@ jobs:
         with:
           fetch-depth: 0 # Needed for tag history
 
+
       # Run Release Drafter again to get the *final* calculated version and notes
       # based on the actual merged state.
       - name: Get Final Release Info
