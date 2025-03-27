@@ -1,39 +1,33 @@
-name: Draft Release and RC Tag
+name: Draft Release
 
 on:
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
     branches:
-      - main # Only for PRs targeting main
+      - main
 
 permissions:
-  contents: write # Need write access to push tags
-  pull-requests: write # Needed by Release Drafter
+  contents: write
+  pull-requests: write
 
 jobs:
   update_draft_and_rc:
     runs-on: ubuntu-latest
-    # Optional: Use environment if PAT is stored there
-    # environment: release_automation
 
     steps:
-      # Checkout the PR head commit
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0 # Needed for tag history
+          fetch-depth: 0
 
-      # Run Release Drafter to create/update the draft
       - name: Draft Release Notes
         id: release_drafter
-        uses: release-drafter/release-drafter@v6
+        uses: jcbasso/release-drafter@nightly
         with:
-          # Ensure it creates a DRAFT, not publish immediately
           publish: false
-          # Target the commit at the head of the PR
           commitish: ${{ github.event.pull_request.head.sha }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Standard token is fine for drafting
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Calculate Next RC Tag
         id: rc_tag
@@ -69,7 +63,6 @@ jobs:
           echo "create_rc=true" >> $GITHUB_OUTPUT
 
       - name: Create and Push RC Tag
-        # Only run if we calculated a new RC tag
         if: steps.rc_tag.outputs.create_rc == 'true'
         shell: bash
         run: |
@@ -86,5 +79,4 @@ jobs:
           git tag "$NEW_RC_TAG" "$COMMIT_SHA"
 
           echo "Pushing tag $NEW_RC_TAG"
-          # Use PAT for authentication to potentially trigger other workflows if needed
           git push https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }}.git "$NEW_RC_TAG"

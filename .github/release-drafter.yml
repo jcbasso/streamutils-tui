@@ -1,5 +1,3 @@
-# .github/release-drafter-config.yml
-
 # Template for the release name (e.g., "v1.2.3")
 name-template: 'v$RESOLVED_VERSION'
 # Template for the tag name (e.g., "v1.2.3")
@@ -7,20 +5,20 @@ tag-template: 'v$RESOLVED_VERSION'
 
 # Define categories for organizing changes in the release notes
 categories:
-  - title: '⚠️ Breaking Changes' # Use a distinct title for breaking changes
-    label: 'breaking' # Assign PRs with the 'breaking' label here
+  - title: '⚠️ Breaking Changes'
+    label: 'breaking'
   - title: '🚀 New Features'
-    label: 'feature' # Assign PRs with the 'feature' label here
+    label: 'feature'
   - title: '🐛 Bug Fixes'
-    label: 'fix'     # Assign PRs with the 'fix' label here
+    label: 'fix'
   - title: '🧹 Maintenance & Chores'
-    labels:          # Assign PRs with 'maintenance' or 'chore' labels here
+    labels:
       - 'maintenance'
       - 'chore'
   - title: '📚 Documentation'
-    label: 'docs'    # Assign PRs with the 'docs' label here
+    label: 'docs'
   - title: '⬆️ Dependency Updates'
-    label: 'dependencies' # Assign PRs with the 'dependencies' label here
+    label: 'dependencies'
     collapse-after: 5 # Collapse this section if there are more than 5 dependency updates
 
 # Template for individual change lines in the release notes
@@ -28,7 +26,6 @@ categories:
 # $NUMBER: PR Number
 # $AUTHOR: PR Author username
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
-# Template for the overall release notes body
 template: |
   ## What's Changed
 
@@ -42,47 +39,42 @@ version-resolver:
     labels:
       # PRs with these labels trigger a major bump (e.g., 1.x.x -> 2.0.0)
       - 'breaking'
-      - 'major' # Explicit major label if needed
+      - 'major'
   minor:
     labels:
       # PRs with these labels trigger a minor bump (e.g., 1.1.x -> 1.2.0)
       - 'feature'
-      - 'minor' # Explicit minor label if needed
+      - 'minor'
   patch:
     labels:
       # PRs with these labels trigger a patch bump (e.g., 1.1.1 -> 1.1.2)
       - 'fix'
-      - 'bug' # Alias for fix
+      - 'bug'
       - 'maintenance'
-      - 'chore' # Alias for maintenance
+      - 'chore'
       - 'docs'
       - 'dependencies'
       - 'security'
       - 'refactor'
       - 'perf'
       - 'test'
-  default: patch # If no labels match, default to a patch bump
+  default: patch
 
 # Automatically add labels to PRs based on branch names or files modified
 autolabeler:
-  - label: 'fix' # Apply 'fix' label
+  - label: 'fix'
     branch:
-      # Match branches starting with fix/, bugfix/, or hotfix/
       - '/^(fix|bugfix|hotfix)\/.+/'
-  - label: 'feature' # Apply 'feature' label
+  - label: 'feature'
     branch:
-      # Match branches starting with feature/
       - '/^feature\/.+/'
-  - label: 'docs' # Apply 'docs' label
+  - label: 'docs'
     branch:
-      # Match branches starting with docs/
-      - '/^docs?\/.+/' # Allow 'doc/' or 'docs/'
-  - label: 'dependencies' # Apply 'dependencies' label
+      - '/^docs?\/.+/'
+  - label: 'dependencies'
     files:
-      # If these files are changed
       - 'go.mod'
       - 'go.sum'
-      # Add other dependency files if needed (e.g., package.json, requirements.txt)
 
 # Labels that exclude a PR from the release notes
 exclude-labels:
