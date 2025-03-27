@@ -1,0 +1,90 @@
+name: Draft Release and RC Tag
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+    branches:
+      - main # Only for PRs targeting main
+
+permissions:
+  contents: write # Need write access to push tags
+  pull-requests: write # Needed by Release Drafter
+
+jobs:
+  update_draft_and_rc:
+    runs-on: ubuntu-latest
+    # Optional: Use environment if PAT is stored there
+    # environment: release_automation
+
+    steps:
+      # Checkout the PR head commit
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0 # Needed for tag history
+
+      # Run Release Drafter to create/update the draft
+      - name: Draft Release Notes
+        id: release_drafter
+        uses: release-drafter/release-drafter@v6
+        with:
+          # Ensure it creates a DRAFT, not publish immediately
+          publish: false
+          # Target the commit at the head of the PR
+          commitish: ${{ github.event.pull_request.head.sha }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Standard token is fine for drafting
+
+      - name: Calculate Next RC Tag
+        id: rc_tag
+        shell: bash
+        run: |
+          # Get the base tag name calculated by Release Drafter
+          BASE_TAG="${{ steps.release_drafter.outputs.tag_name }}"
+          if [[ -z "$BASE_TAG" ]]; then
+            echo "::warning::Release Drafter did not output a tag name. Skipping RC tag."
+            echo "create_rc=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "Base tag determined by Release Drafter: $BASE_TAG"
+
+          # Fetch all tags to ensure we have the latest list
+          git fetch --tags --quiet
+
+          # Find the highest existing RC number for this base tag
+          HIGHEST_RC=0
+          # List tags like BASE_TAG-rc*, sort numerically by RC number, get the last one
+          LATEST_RC_TAG=$(git tag --list "${BASE_TAG}-rc*" | sed -E 's/.*-rc//' | sort -n | tail -n 1)
+
+          if [[ -n "$LATEST_RC_TAG" ]]; then
+            HIGHEST_RC=$LATEST_RC_TAG
+          fi
+
+          NEXT_RC=$((HIGHEST_RC + 1))
+          NEW_RC_TAG="${BASE_TAG}-rc${NEXT_RC}"
+
+          echo "Next RC tag: $NEW_RC_TAG"
+          echo "new_rc_tag=$NEW_RC_TAG" >> $GITHUB_OUTPUT
+          echo "create_rc=true" >> $GITHUB_OUTPUT
+
+      - name: Create and Push RC Tag
+        # Only run if we calculated a new RC tag
+        if: steps.rc_tag.outputs.create_rc == 'true'
+        shell: bash
+        run: |
+          NEW_RC_TAG="${{ steps.rc_tag.outputs.new_rc_tag }}"
+          COMMIT_SHA="${{ github.event.pull_request.head.sha }}"
+
+          # Check if tag already exists locally (less likely but good check)
+          if git rev-parse -q --verify "refs/tags/$NEW_RC_TAG" >/dev/null; then
+             echo "::warning::Tag $NEW_RC_TAG already exists locally. Skipping creation."
+             exit 0
+          fi
+
+          echo "Creating tag $NEW_RC_TAG pointing to $COMMIT_SHA"
+          git tag "$NEW_RC_TAG" "$COMMIT_SHA"
+
+          echo "Pushing tag $NEW_RC_TAG"
+          # Use PAT for authentication to potentially trigger other workflows if needed
+          git push https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }}.git "$NEW_RC_TAG"
