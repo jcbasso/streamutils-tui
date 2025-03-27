@@ -30,6 +30,7 @@ jobs:
           configuration-path: .github/labeler.yml # Explicitly point to config
           # sync-labels: true # Optional: Remove labels if rules no longer match
 
+
       # Run Release Drafter to create/update the draft
       - name: Draft Release Notes
         id: release_drafter
