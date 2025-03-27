@@ -73,7 +73,7 @@ jobs:
           done <<< "$ASSET_NAMES" # Use Here String for safer looping
           echo "::endgroup::"
 
-          echo "Finished deleting previous assets."
+          echo "Finished deleting previous assets." 
 
       - name: Upload RC Assets to Draft
         uses: AButler/upload-release-assets@v3.0
