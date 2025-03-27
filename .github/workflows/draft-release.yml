@@ -24,7 +24,7 @@ jobs:
         id: release_drafter
         uses: jcbasso/release-drafter@nightly
         with:
-          publish: false
+          publish: true
           prerelease: true
           prerelease-identifier: 'rc'
           commitish: ${{ github.event.pull_request.head.sha }}
