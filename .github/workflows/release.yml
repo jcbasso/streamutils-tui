@@ -23,6 +23,7 @@ jobs:
         with:
           publish: false
           commitish: ${{ github.sha }}
+          not-create: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
