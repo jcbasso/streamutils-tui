@@ -5,19 +5,19 @@ tag-template: 'v$RESOLVED_VERSION'
 
 # Define categories for organizing changes in the release notes
 categories:
-  - title: '⚠️ Breaking Changes'
+  - title: 'Breaking Changes'
     label: 'breaking'
-  - title: '🚀 New Features'
+  - title: 'New'
     label: 'feature'
-  - title: '🐛 Bug Fixes'
+  - title: 'Bug Fixes'
     label: 'fix'
-  - title: '🧹 Maintenance & Chores'
+  - title: 'Maintenance'
     labels:
       - 'maintenance'
       - 'chore'
-  - title: '📚 Documentation'
+  - title: 'Documentation'
     label: 'docs'
-  - title: '⬆️ Dependency Updates'
+  - title: 'Dependency Updates'
     label: 'dependencies'
     collapse-after: 5 # Collapse this section if there are more than 5 dependency updates
 
@@ -71,6 +71,12 @@ autolabeler:
   - label: 'docs'
     branch:
       - '/^docs?\/.+/'
+  - label: 'breaking'
+    branch:
+      - '/^release?\/.+/'
+  - label: 'chore'
+    branch:
+      - '/^chore\/.+/'
   - label: 'dependencies'
     files:
       - 'go.mod'
