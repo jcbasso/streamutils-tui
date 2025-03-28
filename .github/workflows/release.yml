@@ -103,6 +103,8 @@ jobs:
           echo "Cleaning up RC tags for $FINAL_TAG..."
           git fetch --tags --quiet
           RC_TAGS=$(git tag --list "${FINAL_TAG}-rc*")
+          git config --local user.name github-actions
+          git config --local user.email github-actions@github.com
           if [[ -n "$RC_TAGS" ]]; then
             for rc_tag in $RC_TAGS; do
               echo "Deleting remote tag $rc_tag"
