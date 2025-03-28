@@ -108,7 +108,8 @@ jobs:
           if [[ -n "$RC_TAGS" ]]; then
             for rc_tag in $RC_TAGS; do
               echo "Deleting remote tag $rc_tag"
-              git push --delete origin "$rc_tag" || echo "::warning::Failed to delete tag $rc_tag. It might have already been deleted."
+              git push --delete https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ github.repository }}.git "$rc_tag" \
+                || echo "::warning::Failed to delete tag $rc_tag. It might have already been deleted."
             done
           else
             echo "No RC tags found to delete."
