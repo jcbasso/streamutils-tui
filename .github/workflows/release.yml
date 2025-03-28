@@ -31,7 +31,7 @@ jobs:
         id: final_tag
         shell: bash
         run: |
-          FINAL_TAG="${{ steps.release_drafter_final.outputs.tag_name }}"
+          FINAL_TAG="v${{ steps.release_drafter_final.outputs.resolved_version }}"
           if [[ -z "$FINAL_TAG" ]]; then
             echo "::error::Release Drafter did not determine a final tag name. Cannot proceed."
             exit 1

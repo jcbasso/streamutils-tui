@@ -85,7 +85,7 @@ runs:
 
           GOOS=${platform%/*}
           GOARCH=${platform#*/}
-          OUTPUT_NAME="$APP_NAME-${VERSION}-${GOOS}-${GOARCH}"
+          OUTPUT_NAME="$APP_NAME-${GOOS}-${GOARCH}"
           if [ "$GOOS" = "windows" ]; then
             OUTPUT_NAME+=".exe"
           fi
@@ -129,5 +129,5 @@ runs:
         done
 
         echo "::notice::All builds completed."
-        
+
         echo "artifact-path=$BUILD_DIR" >> $GITHUB_OUTPUT
