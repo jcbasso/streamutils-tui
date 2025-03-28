@@ -11,11 +11,12 @@ permissions:
 jobs:
   publish_release:
     runs-on: ubuntu-latest
-
+    environment: production
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Get Final Release Info
         id: release_drafter_final
@@ -51,7 +52,7 @@ jobs:
           git tag "$FINAL_TAG" "${{ github.sha }}"
 
           echo "Pushing tag $FINAL_TAG"
-          git push https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }}.git "$FINAL_TAG"
+          git push https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ github.repository }}.git "$FINAL_TAG"
 
           echo "final_tag=$FINAL_TAG" >> $GITHUB_OUTPUT
           echo "tag_exists=false" >> $GITHUB_OUTPUT
@@ -72,7 +73,7 @@ jobs:
               # Create a new release if draft wasn't found (fallback)
               gh release create "$FINAL_TAG" \
                  --tag "$FINAL_TAG" \
-                 --title "${{ steps.release_drafter_final.outputs.name }}" \
+                 --title "v${{ steps.release_drafter_final.outputs.resolved_version }}" \
                  --notes "${{ steps.release_drafter_final.outputs.body }}" \
                  --target "${{ github.sha }}" \
                  --draft=false \
@@ -83,7 +84,7 @@ jobs:
               # Edit the existing draft release
               gh release edit "$RELEASE_TAG" \
                  --tag "$FINAL_TAG" \
-                 --title "${{ steps.release_drafter_final.outputs.name }}" \
+                 --title "v${{ steps.release_drafter_final.outputs.resolved_version }}" \
                  --notes "${{ steps.release_drafter_final.outputs.body }}" \
                  --target "${{ github.sha }}" \
                  --draft=false \
@@ -105,7 +106,7 @@ jobs:
           if [[ -n "$RC_TAGS" ]]; then
             for rc_tag in $RC_TAGS; do
               echo "Deleting remote tag $rc_tag"
-              git push https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }}.git --delete "$rc_tag" || echo "::warning::Failed to delete tag $rc_tag. It might have already been deleted."
+              git push --delete "$rc_tag" || echo "::warning::Failed to delete tag $rc_tag. It might have already been deleted."
             done
           else
             echo "No RC tags found to delete."
