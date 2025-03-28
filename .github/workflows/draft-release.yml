@@ -40,6 +40,7 @@ jobs:
           version: ${{ steps.release_drafter.outputs.tag_name }}
           app-name: streamutils-tui
           output-dir: build
+          compress: true
 
       - name: Delete Previous RC Assets from Draft
         if: steps.release_drafter.outputs.id != ''
