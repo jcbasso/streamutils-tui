@@ -76,6 +76,7 @@ jobs:
                  --notes "${{ steps.release_drafter_final.outputs.body }}" \
                  --target "${{ github.sha }}" \
                  --draft=false \
+                 --prerelease=false \
                  --latest=true
           else
               echo "Found draft release ID: $RELEASE_TAG. Updating to published."
@@ -86,6 +87,7 @@ jobs:
                  --notes "${{ steps.release_drafter_final.outputs.body }}" \
                  --target "${{ github.sha }}" \
                  --draft=false \
+                 --prerelease=false \
                  --latest=true
           fi
         env:
